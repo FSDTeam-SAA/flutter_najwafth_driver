@@ -1,12 +1,14 @@
 import 'package:flutter/foundation.dart';
 
-const bool kUseLiveServer = bool.fromEnvironment(
-  'USE_LIVE_SERVER',
-  defaultValue: false,
-);
-
 const String _liveBaseUrl = 'https://api.booksonwheeels.com';
-const int _localPort = 5002;
+const int _localPort = 5020;
+
+/// Live server is used by default in every build mode. Point a debug build at
+/// a local backend with `--dart-define=USE_LIVE_SERVER=false`.
+const bool _useLiveServer = bool.fromEnvironment(
+  'USE_LIVE_SERVER',
+  defaultValue: true,
+);
 const String _apiBaseUrlOverride = String.fromEnvironment('API_BASE_URL');
 
 enum AppEnvironment { development, staging, production }
@@ -23,7 +25,7 @@ final class AppConfig {
   factory AppConfig.development() {
     return AppConfig(
       appName: 'Books on Wheels Driver',
-      environment: kUseLiveServer
+      environment: _useLiveServer
           ? AppEnvironment.production
           : AppEnvironment.development,
       baseUrl: _resolveBaseUrl(),
@@ -42,8 +44,7 @@ final class AppConfig {
 
 String _resolveBaseUrl() {
   if (_apiBaseUrlOverride.isNotEmpty) return _apiBaseUrlOverride;
-  if (kUseLiveServer) return _liveBaseUrl;
-
+  if (_useLiveServer) return _liveBaseUrl;
   return defaultTargetPlatform == TargetPlatform.android
       ? 'http://10.0.2.2:$_localPort'
       : 'http://localhost:$_localPort';
